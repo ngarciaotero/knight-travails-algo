@@ -1,13 +1,5 @@
-const knightMovePatterns = [
-  [1, 2],
-  [-1, 2],
-  [1, -2],
-  [-1, -2],
-  [2, 1],
-  [2, -1],
-  [-2, 1],
-  [-2, -1],
-];
+import { createSquare } from "./square.js";
+import { knightMovePatterns } from "./pieceMovePattern.js";
 
 export function board(size) {
   if (typeof size !== "number" || size <= 0) {
@@ -18,48 +10,41 @@ export function board(size) {
   const boardMap = initializeMap();
 
   function initializeMap() {
-    const adjacencyList = {};
+    const adjList = {};
     for (let row = 0; row <= boardSize; row++) {
       for (let col = 0; col <= boardSize; col++) {
-        const vertex = `${row},${col}`;
-        addVertex(vertex, adjacencyList);
+        const square = createSquare(row, col);
+        addSquare(square.toString(), adjList);
 
-        const moves = calcKnightMoves(row, col);
-        for (const [adjRow, adjCol] of moves) {
-          if (isVertexInRange(adjRow, adjCol)) {
-            const adjVertex = `${adjRow},${adjCol}`;
-            addEdge(vertex, adjVertex, adjacencyList);
+        const knightMoves = square.calcPieceMoves(knightMovePatterns);
+        for (const [adjRow, adjCol] of knightMoves) {
+          if (isSquareInRange(adjRow, adjCol)) {
+            const adjSquare = createSquare(adjRow, adjCol);
+            addMove(square.toString(), adjSquare, adjList);
           }
         }
       }
     }
-    return adjacencyList;
+    return adjList;
   }
 
-  function addVertex(vertex, adjacencyList) {
-    if (!adjacencyList[vertex]) {
-      adjacencyList[vertex] = [];
+  function addSquare(squareStr, adjList) {
+    if (!adjList[squareStr]) {
+      adjList[squareStr] = [];
     }
   }
 
-  function addEdge(vertex, adjVertex, adjacencyList) {
-    if (adjacencyList[vertex]) {
-      adjacencyList[vertex].push(adjVertex);
+  function addMove(squareStr, adjSquare, adjList) {
+    if (adjList[squareStr]) {
+      adjList[squareStr].push(adjSquare);
     }
-  }
-
-  function calcKnightMoves(row, col) {
-    return knightMovePatterns.map(([rowOffset, colOffset]) => [
-      row + rowOffset,
-      col + colOffset,
-    ]);
   }
 
   function isWithinBounds(value) {
     return value <= boardSize && value >= 0;
   }
 
-  function isVertexInRange(row, col) {
+  function isSquareInRange(row, col) {
     return isWithinBounds(row) && isWithinBounds(col);
   }
 
